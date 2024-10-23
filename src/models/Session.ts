@@ -11,11 +11,11 @@ export interface ISession {
 }
 
 const sessionSchema = new Schema<ISession>({
-    _id: { type: String, default: uuidv4 }, // Set _id to be a UUID
+    _id: { type: String, default: uuidv4 },
     courseId: { type: Schema.Types.UUID, required: true},
     userId: { type: Schema.Types.UUID, required: true},
     totalModulesStudied: { type: Schema.Types.Number, required: true},
-    averageScore: { type: Schema.Types.Number, required: true, default: 0},
+    averageScore: { type: Schema.Types.Number, required: true},
     timeStudied: { type: Schema.Types.Number, required: true}
 })
 

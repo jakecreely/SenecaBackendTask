@@ -3,10 +3,10 @@ import cors from 'cors';
 import 'dotenv/config'
 import { Server } from 'http'
 import { connectToDB } from './db';
+import { DEFAULT_PORT } from './config';
 
 // Routes
 import courseRoutes from './routes/courseRoutes'
-import { DEFAULT_PORT } from './config';
 
 export const startServer = () => {
     const app = express();

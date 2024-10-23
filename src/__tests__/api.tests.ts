@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
 import { v4 as uuidv4 } from 'uuid'
 import { getRandomInt } from '../utils';
-import axios from 'axios';
 import { DEFAULT_PORT } from '../config';
 import { Server } from 'http'
-import 'dotenv/config'
 import { connectToDB, disconnectFromDB } from '../db';
 import { startServer, stopServer } from '..';
+import axios from 'axios';
+import 'dotenv/config'
 
 // Create an Axios instance
 const api = axios.create({
@@ -58,8 +58,16 @@ describe("POST /courses/{courseId}", () => {
 
     expect(response.status).toBe(axios.HttpStatusCode.Created)
   })
+
+  test.todo("Fails because of server error")
+
+  test.todo("Fails because of parameter error")
+
+  test.todo("Fails because of header error")
+
 })
 
+// TODO: Create multiple sessions and check that the aggregation is working
 describe("GET /course/{courseId}", () => {
   test('Retrieves lifetime stats for given course', async () => {
     // Parameters
@@ -97,6 +105,12 @@ describe("GET /course/{courseId}", () => {
     expect(response.data.timeStudied).toBe(timeStudied)
     expect(response.status).toBe(axios.HttpStatusCode.Ok)
   })
+
+  test.todo("Fails because of server error")
+
+  test.todo("Fails because of parameter error")
+
+  test.todo("Fails because of header error")
 })
 
 describe("GET /courses/{courseId}/sessions/{sessionId}", () => {
@@ -139,4 +153,9 @@ describe("GET /courses/{courseId}/sessions/{sessionId}", () => {
     expect(response.status).toBe(axios.HttpStatusCode.Ok)
   })
 
+  test.todo("Fails because of server error")
+
+  test.todo("Fails because of parameter error")
+
+  test.todo("Fails because of header error")
 })
