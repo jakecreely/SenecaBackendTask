@@ -5,12 +5,12 @@ import { HttpError } from 'http-errors';
 
 const router = Router();
 
-router.get('/:courseId', async (req: Request<{courseId: string}>, res: Response) => {
+router.get('/:courseId', async (req: Request<{ courseId: string }>, res: Response) => {
     try {
         const courseId = req.params.courseId
         const userId = req.headers['userid']
 
-        const sessions = await Session.find({courseId: courseId, userId: userId})
+        const sessions = await Session.find({ courseId: courseId, userId: userId })
 
         const totalModulesStudied = sessions.reduce((acc, session) => acc + session.totalModulesStudied, 0)
         const totalScore = sessions.reduce((acc, session) => acc + session.averageScore, 0)
@@ -32,13 +32,14 @@ router.get('/:courseId', async (req: Request<{courseId: string}>, res: Response)
 })
 
 
-router.post('/:courseId', async (req: Request<{courseId: string}, {}, ISession>, res: Response) => {
+router.post('/:courseId', async (req: Request<{ courseId: string }>, res: Response) => {
     try {
         const courseId = req.params.courseId
         const userId = req.headers['userid']
-        const { totalModulesStudied, averageScore, timeStudied} = req.body
+        const { sessionId, totalModulesStudied, averageScore, timeStudied } = req.body
 
         const session = new Session({
+            _id: sessionId,
             courseId,
             userId,
             totalModulesStudied,
@@ -47,7 +48,7 @@ router.post('/:courseId', async (req: Request<{courseId: string}, {}, ISession>,
         })
 
         await session.save()
-        
+
         res.status(HttpStatusCode.Created).send()
     } catch (err) {
         if (err instanceof HttpError) {
@@ -56,18 +57,20 @@ router.post('/:courseId', async (req: Request<{courseId: string}, {}, ISession>,
             res.status(HttpStatusCode.InternalServerError).send((err as Error).message)
         }
     }
-    
+
     res.status(HttpStatusCode.Created).send()
 })
 
-router.get('/:courseId/sessions/:sessionId', async (req: Request<{courseId: string, sessionId: string}>, res: Response) => {
+router.get('/:courseId/sessions/:sessionId', async (req: Request<{ courseId: string, sessionId: string }>, res: Response) => {
     try {
         const courseId = req.params.courseId
         const sessionId = req.params.sessionId
         const userId = req.headers['userid']
 
-        const session = await Session.findOne({courseId: courseId, userId: userId, _id: sessionId})
-        
+        const allSessions = await Session.find({})
+
+        const session = await Session.findOne({ courseId: courseId, userId: userId, _id: sessionId })
+
         res.status(HttpStatusCode.Ok).send({
             sessionId: session._id,
             totalModulesStudied: session.totalModulesStudied,

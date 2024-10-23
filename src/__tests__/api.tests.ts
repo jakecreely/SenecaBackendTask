@@ -1,12 +1,24 @@
 import { afterAll, beforeAll, describe, expect, test } from '@jest/globals';
-import { v4 as uuidv4} from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 import { getRandomInt } from '../utils';
 import axios from 'axios';
+import { DEFAULT_PORT } from '../config';
+import { Server } from 'http'
+import 'dotenv/config'
+import { connectToDB, disconnectFromDB } from '../db';
+import { startServer, stopServer } from '..';
+
+// Create an Axios instance
+const api = axios.create({
+  baseURL: `http://localhost:${process.env.PORT || DEFAULT_PORT}`, // Set your base URL here
+});
+
+let server : Server
 
 beforeAll(async () => {
   try {
-    // Init Test DB
-    // Start Server
+    server = startServer()
+    await connectToDB()
   } catch (err) {
     console.log(err)
   }
@@ -14,15 +26,15 @@ beforeAll(async () => {
 
 afterAll(async () => {
   try {
-    // Stop Test DB
-    // Stop Server
+    await stopServer(server)
+    await disconnectFromDB()
   } catch (err) {
     console.log(err)
   }
 })
 
 describe("POST /courses/{courseId}", () => {
-  test("Successfully persists a session study event with valid inputs", async () => {
+  test("Persists a session study event with valid inputs", async () => {
     // Parameters
     const userId = uuidv4();
     const courseId = uuidv4();
@@ -33,7 +45,7 @@ describe("POST /courses/{courseId}", () => {
     const averageScore = getRandomInt(100);
     const timeStudied = getRandomInt(120);
 
-    const response = await axios.post(`http://localhost:8080/courses/${courseId}`, {
+    const response = await api.post(`/courses/${courseId}`, {
       sessionId: sessionId,
       totalModulesStudied: totalModulesStudied,
       averageScore: averageScore,
@@ -49,31 +61,31 @@ describe("POST /courses/{courseId}", () => {
 })
 
 describe("GET /course/{courseId}", () => {
-  test('Success', async () => {
+  test('Retrieves lifetime stats for given course', async () => {
     // Parameters
     const userId = uuidv4();
     const courseId = uuidv4();
-    
+
     // Request Body
     const sessionId = uuidv4();
     const totalModulesStudied = getRandomInt(50);
     const averageScore = getRandomInt(100);
     const timeStudied = getRandomInt(120);
 
-    await axios.post(`http://localhost:8080/courses/${courseId}`, {
+    await api.post(`/courses/${courseId}`, {
       sessionId: sessionId,
       totalModulesStudied: totalModulesStudied,
       averageScore: averageScore,
       timeStudied: timeStudied
     }, {
       headers: {
-        userId: userId
+        userid: userId
       }
     })
 
-    const response = await axios.get(`http://localhost:8080/courses/${courseId}`, {
+    const response = await api.get(`/courses/${courseId}`, {
       headers: {
-        userId: userId
+        userid: userId
       }
     })
 
@@ -88,8 +100,7 @@ describe("GET /course/{courseId}", () => {
 })
 
 describe("GET /courses/{courseId}/sessions/{sessionId}", () => {
-  test("Success", async () => {
-    try {
+  test("Gets stats for specific session in a course", async () => {
     // Parameters
     const userId = uuidv4();
     const courseId = uuidv4();
@@ -100,7 +111,7 @@ describe("GET /courses/{courseId}/sessions/{sessionId}", () => {
     const averageScore = getRandomInt(100);
     const timeStudied = getRandomInt(120);
 
-    await axios.post(`http://localhost:8080/courses/${courseId}`, {
+    await api.post(`/courses/${courseId}`, {
       sessionId: sessionId,
       totalModulesStudied: totalModulesStudied,
       averageScore: averageScore,
@@ -111,9 +122,9 @@ describe("GET /courses/{courseId}/sessions/{sessionId}", () => {
       }
     })
 
-    const response = await axios.get(`http://localhost:8080/courses/${courseId}/sessions/${sessionId}`, {
+    const response = await api.get(`/courses/${courseId}/sessions/${sessionId}`, {
       headers: {
-        userId: userId
+        userid: userId
       }
     })
 
@@ -126,9 +137,6 @@ describe("GET /courses/{courseId}/sessions/{sessionId}", () => {
     expect(response.data.averageScore).toBe(averageScore)
     expect(response.data.timeStudied).toBe(timeStudied)
     expect(response.status).toBe(axios.HttpStatusCode.Ok)
-  } catch (err) {
-    console.log(err)
-  }
   })
-  
+
 })
