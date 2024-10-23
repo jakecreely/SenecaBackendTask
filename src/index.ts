@@ -2,12 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import 'dotenv/config'
 import axios from 'axios';
+import { startDB } from './db';
 
 // Routes
 import courseRoutes from './routes/courseRoutes'
 
 const app = express();
 const DEFAULT_PORT = 3000;
+
+startDB();
 
 app.use(cors());
 app.use(express.json());

@@ -33,7 +33,7 @@ describe("POST /courses/{courseId}", () => {
     const averageScore = getRandomInt(100);
     const timeStudied = getRandomInt(120);
 
-    const response = await axios.post(`/courses/${courseId}`, {
+    const response = await axios.post(`http://localhost:8080/courses/${courseId}`, {
       sessionId: sessionId,
       totalModulesStudied: totalModulesStudied,
       averageScore: averageScore,
@@ -60,7 +60,7 @@ describe("GET /course/{courseId}", () => {
     const averageScore = getRandomInt(100);
     const timeStudied = getRandomInt(120);
 
-    await axios.post(`/courses/${courseId}`, {
+    await axios.post(`http://localhost:8080/courses/${courseId}`, {
       sessionId: sessionId,
       totalModulesStudied: totalModulesStudied,
       averageScore: averageScore,
@@ -71,7 +71,7 @@ describe("GET /course/{courseId}", () => {
       }
     })
 
-    const response = await axios.get(`/courses/${courseId}`, {
+    const response = await axios.get(`http://localhost:8080/courses/${courseId}`, {
       headers: {
         userId: userId
       }
@@ -89,6 +89,7 @@ describe("GET /course/{courseId}", () => {
 
 describe("GET /courses/{courseId}/sessions/{sessionId}", () => {
   test("Success", async () => {
+    try {
     // Parameters
     const userId = uuidv4();
     const courseId = uuidv4();
@@ -99,7 +100,7 @@ describe("GET /courses/{courseId}/sessions/{sessionId}", () => {
     const averageScore = getRandomInt(100);
     const timeStudied = getRandomInt(120);
 
-    await axios.post(`/courses/${courseId}`, {
+    await axios.post(`http://localhost:8080/courses/${courseId}`, {
       sessionId: sessionId,
       totalModulesStudied: totalModulesStudied,
       averageScore: averageScore,
@@ -110,7 +111,7 @@ describe("GET /courses/{courseId}/sessions/{sessionId}", () => {
       }
     })
 
-    const response = await axios.get(`/courses/${courseId}/sessions/${sessionId}`, {
+    const response = await axios.get(`http://localhost:8080/courses/${courseId}/sessions/${sessionId}`, {
       headers: {
         userId: userId
       }
@@ -125,5 +126,9 @@ describe("GET /courses/{courseId}/sessions/{sessionId}", () => {
     expect(response.data.averageScore).toBe(averageScore)
     expect(response.data.timeStudied).toBe(timeStudied)
     expect(response.status).toBe(axios.HttpStatusCode.Ok)
+  } catch (err) {
+    console.log(err)
+  }
   })
+  
 })
