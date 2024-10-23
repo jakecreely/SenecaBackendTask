@@ -1,0 +1,8 @@
+Seneca Backend Technical Task - Jake Creely
+
+Environment Variables:
+PORT - define the port the server runs on by default this is 3000 as defined in src/config.ts
+MONGODB_URL - url of the mongodb, might look something like this mongodb://localhost:27017/stats
+
+Assumptions:
+Only added test cases for the responses in the API schema which were all if it was successful. The routes should handle errors but no test cases to confirm at the moment.
