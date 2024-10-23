@@ -15,8 +15,8 @@ router.get('/:courseId', async (req: Request<{ courseId: string }>, res: Respons
         const totalModulesStudied = sessions.reduce((acc, session) => acc + session.totalModulesStudied, 0)
         const totalScore = sessions.reduce((acc, session) => acc + session.averageScore, 0)
         const timeStudied = sessions.reduce((acc, session) => acc + session.timeStudied, 0)
+        const averageScore = (totalScore / sessions.length) || 0
 
-        const averageScore = totalScore / sessions.length // Could be null
         res.status(HttpStatusCode.Ok).send({
             totalModulesStudied,
             averageScore,
