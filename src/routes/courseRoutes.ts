@@ -56,7 +56,7 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
     if (err instanceof HttpError) {
         res.status(err.status).send(err.message);
     } else if (err instanceof ServerError) {
-        res.status(err.httpStatusCode).send(err.message);
+        res.status(HttpStatusCode.InternalServerError).send(err.message);
     } else {
         console.error(err); // Log unexpected errors for debugging
         res.status(HttpStatusCode.InternalServerError).send('An unexpected error occurred.'); // Send generic message for 500 errors

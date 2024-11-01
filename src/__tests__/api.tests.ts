@@ -4,7 +4,7 @@ import { getRandomInt } from '../utils';
 import { DEFAULT_PORT } from '../config';
 import { Server } from 'http'
 import { connectToDB, disconnectFromDB } from '../db';
-import { startServer, stopServer } from '..';
+import { initialiseApp, startServer, stopServer } from '..';
 import axios from 'axios';
 import 'dotenv/config'
 
@@ -17,9 +17,11 @@ const api = axios.create({
 
 let server : Server
 
+// TODO: Add test functions for initialising
+
 beforeAll(async () => {
   try {
-    server = startServer()
+    server = await startServer()
     await connectToDB()
   } catch (err) {
     console.log(err)
