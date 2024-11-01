@@ -8,6 +8,7 @@ import { DEFAULT_PORT } from './config';
 // Routes
 import courseRoutes from './routes/courseRoutes'
 
+// TODO: Turn this into a promise as well - handle the errors
 export const startServer = () => {
     const app = express();
 
@@ -27,6 +28,7 @@ export const startServer = () => {
     return server;
 }
 
+//TODO: Add error codes and more context to the error
 export const stopServer = (server : Server) => {
     return new Promise<void>((resolve, reject) => {
         server.close((err) => {

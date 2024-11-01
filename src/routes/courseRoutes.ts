@@ -1,9 +1,11 @@
 import { HttpStatusCode } from 'axios';
 import { Request, Router, Response } from 'express';
-import { ISession, Session } from '../models/Session';
+import { Session } from '../models/Session';
 import { HttpError } from 'http-errors';
 
 const router = Router();
+
+// TODO: Validate request parameters and headers
 
 router.get('/:courseId', async (req: Request<{ courseId: string }>, res: Response) => {
     try {
@@ -66,8 +68,6 @@ router.get('/:courseId/sessions/:sessionId', async (req: Request<{ courseId: str
         const courseId = req.params.courseId
         const sessionId = req.params.sessionId
         const userId = req.headers['userid']
-
-        const allSessions = await Session.find({})
 
         const session = await Session.findOne({ courseId: courseId, userId: userId, _id: sessionId })
 
