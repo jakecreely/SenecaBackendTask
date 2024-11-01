@@ -3,6 +3,7 @@ import { Request, Router, Response, NextFunction } from 'express';
 import { Session } from '../models/Session';
 import { HttpError } from 'http-errors';
 import { z } from "zod";
+import { ServerError } from '../errors/ServerError';
 
 const router = Router();
 
@@ -51,7 +52,20 @@ const validateParameters = (schema: z.ZodSchema<any>) => {
     }
 }
 
-router.get('/:courseId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema)], async (req: Request<{ courseId: string }>, res: Response) => {
+const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+    if (err instanceof HttpError) {
+        res.status(err.status).send(err.message);
+    } else if (err instanceof ServerError) {
+        res.status(err.httpStatusCode).send(err.message);
+    } else {
+        console.error(err); // Log unexpected errors for debugging
+        res.status(HttpStatusCode.InternalServerError).send('An unexpected error occurred.'); // Send generic message for 500 errors
+    }
+};
+
+router.use(errorHandler)
+
+router.get('/:courseId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema)], async (req: Request<{ courseId: string }>, res: Response, next: NextFunction) => {
     try {
         const courseId = req.params.courseId
         const userId = req.headers['userid']
@@ -69,16 +83,11 @@ router.get('/:courseId', [validateHeaders(headersSchema), validateParameters(cou
             timeStudied
         })
     } catch (err) {
-        if (err instanceof HttpError) {
-            res.status(err.status).send(err.message)
-        } else {
-            res.status(HttpStatusCode.InternalServerError).send((err as Error).message)
-        }
+        next(err)
     }
 })
 
-
-router.post('/:courseId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema)], async (req: Request<{ courseId: string }>, res: Response) => {
+router.post('/:courseId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema)], async (req: Request<{ courseId: string }>, res: Response, next: NextFunction) => {
     try {
         const courseId = req.params.courseId
         const userId = req.headers['userid']
@@ -97,17 +106,13 @@ router.post('/:courseId', [validateHeaders(headersSchema), validateParameters(co
 
         res.status(HttpStatusCode.Created).send()
     } catch (err) {
-        if (err instanceof HttpError) {
-            res.status(err.status).send(err.message)
-        } else {
-            res.status(HttpStatusCode.InternalServerError).send((err as Error).message)
-        }
+        next(err)
     }
 
     res.status(HttpStatusCode.Created).send()
 })
 
-router.get('/:courseId/sessions/:sessionId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema), validateParameters(sessionIdParamSchema)], async (req: Request<{ courseId: string, sessionId: string }>, res: Response) => {
+router.get('/:courseId/sessions/:sessionId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema), validateParameters(sessionIdParamSchema)], async (req: Request<{ courseId: string, sessionId: string }>, res: Response, next: NextFunction) => {
     try {
         const courseId = req.params.courseId
         const sessionId = req.params.sessionId
@@ -122,11 +127,7 @@ router.get('/:courseId/sessions/:sessionId', [validateHeaders(headersSchema), va
             timeStudied: session.timeStudied
         })
     } catch (err) {
-        if (err instanceof HttpError) {
-            res.status(err.status).send(err.message)
-        } else {
-            res.status(HttpStatusCode.InternalServerError).send((err as Error).message)
-        }
+        next(err)
     }
 })
 
