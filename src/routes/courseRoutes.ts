@@ -1,13 +1,57 @@
 import { HttpStatusCode } from 'axios';
-import { Request, Router, Response } from 'express';
+import { Request, Router, Response, NextFunction } from 'express';
 import { Session } from '../models/Session';
 import { HttpError } from 'http-errors';
+import { z } from "zod";
 
 const router = Router();
 
-// TODO: Validate request parameters and headers
+const headersSchema = z.object({
+    userid: z.string().min(1, "User ID is required in headers").uuid("User ID needs to be in UUID format")
+})
 
-router.get('/:courseId', async (req: Request<{ courseId: string }>, res: Response) => {
+const courseIdParamSchema = z.object({
+    courseId: z.string().min(1, "Course ID is a required parameter").uuid("Course ID Needs to be in UUID format")
+})
+
+const sessionIdParamSchema = z.object({
+    sessionId: z.string().min(1, "Session ID is a required parameter").uuid("Session ID Needs to be in UUID format")
+})
+
+// TODO: Standardise error structure
+const validateHeaders = (schema: z.ZodSchema<any>) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        const validationResult = schema.safeParse(req.headers)
+        if (!validationResult.success) {
+            res.status(HttpStatusCode.BadRequest).send({
+                status: "error",
+                message: "Validation error",
+                errors: validationResult.error.errors
+            })
+        } else {
+            req.headers = validationResult.data
+            next()
+        }
+    }
+}
+
+const validateParameters = (schema: z.ZodSchema<any>) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        const validationResult = schema.safeParse(req.params)
+        if (!validationResult.success) {
+            res.status(HttpStatusCode.BadRequest).send({
+                status: "error",
+                message: "Validation error",
+                errors: validationResult.error.errors
+            })
+        } else {
+            req.headers = validationResult.data
+            next()
+        }
+    }
+}
+
+router.get('/:courseId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema)], async (req: Request<{ courseId: string }>, res: Response) => {
     try {
         const courseId = req.params.courseId
         const userId = req.headers['userid']
@@ -34,7 +78,7 @@ router.get('/:courseId', async (req: Request<{ courseId: string }>, res: Respons
 })
 
 
-router.post('/:courseId', async (req: Request<{ courseId: string }>, res: Response) => {
+router.post('/:courseId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema)], async (req: Request<{ courseId: string }>, res: Response) => {
     try {
         const courseId = req.params.courseId
         const userId = req.headers['userid']
@@ -63,7 +107,7 @@ router.post('/:courseId', async (req: Request<{ courseId: string }>, res: Respon
     res.status(HttpStatusCode.Created).send()
 })
 
-router.get('/:courseId/sessions/:sessionId', async (req: Request<{ courseId: string, sessionId: string }>, res: Response) => {
+router.get('/:courseId/sessions/:sessionId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema), validateParameters(sessionIdParamSchema)], async (req: Request<{ courseId: string, sessionId: string }>, res: Response) => {
     try {
         const courseId = req.params.courseId
         const sessionId = req.params.sessionId

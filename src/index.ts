@@ -41,3 +41,5 @@ export const stopServer = (server : Server) => {
         });
     });
 }
+
+startServer()
