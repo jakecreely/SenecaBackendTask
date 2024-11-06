@@ -19,6 +19,12 @@ const sessionIdParamSchema = z.object({
     sessionId: z.string().min(1, "Session ID is a required parameter").uuid("Session ID Needs to be in UUID format")
 })
 
+const courseIdAndSessionIdParamSchema = z.object({
+    courseId: z.string().min(1, "Course ID is a required parameter").uuid("Course ID Needs to be in UUID format"),
+    sessionId: z.string().min(1, "Session ID is a required parameter").uuid("Session ID Needs to be in UUID format")
+})
+
+
 // TODO: Standardise error structure
 const validateHeaders = (schema: z.ZodSchema<any>) => {
     return (req: Request, res: Response, next: NextFunction) => {
@@ -46,7 +52,7 @@ const validateParameters = (schema: z.ZodSchema<any>) => {
                 errors: validationResult.error.errors
             })
         } else {
-            req.headers = validationResult.data
+            req.params = validationResult.data
             next()
         }
     }
@@ -112,7 +118,7 @@ router.post('/:courseId', [validateHeaders(headersSchema), validateParameters(co
     res.status(HttpStatusCode.Created).send()
 })
 
-router.get('/:courseId/sessions/:sessionId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema), validateParameters(sessionIdParamSchema)], async (req: Request<{ courseId: string, sessionId: string }>, res: Response, next: NextFunction) => {
+router.get('/:courseId/sessions/:sessionId', [validateHeaders(headersSchema), validateParameters(courseIdAndSessionIdParamSchema)], async (req: Request<{ courseId: string, sessionId: string }>, res: Response, next: NextFunction) => {
     try {
         const courseId = req.params.courseId
         const sessionId = req.params.sessionId
