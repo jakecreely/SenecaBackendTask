@@ -23,8 +23,6 @@ export const startServer = (): Promise<Server> => {
             const server = app.listen(process.env.PORT || DEFAULT_PORT, () => {
                 const port = process.env.PORT || DEFAULT_PORT;
                 console.log(`Server running on port ${port}!`);
-                console.log(`Server inside callback: ${server}`)
-                console.log(server.listening)
                 resolve(server)
             })
 
