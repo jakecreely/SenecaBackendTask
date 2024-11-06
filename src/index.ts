@@ -17,13 +17,13 @@ export const initialiseApp = async () => {
     } catch (error) {
         if (error instanceof DatabaseError) {
             console.error('Database connection failed:', error.message);
-            process.exit(1); // Exit if the database connection fails
+            process.exit(1);
         } else if (error instanceof ServerError) {
             console.error('Server initialization failed:', error.message);
-            process.exit(1); // Exit if server initialization fails
+            process.exit(1);
         } else {
             console.error('Unexpected initialization error:', error);
-            process.exit(1); // Exit on unknown errors
+            process.exit(1);
         }
     }
 }
@@ -37,14 +37,16 @@ export const startServer = (): Promise<Server> => {
             app.use(express.json());
             app.use(express.urlencoded({ extended: true }));
 
+            app.use('/courses', courseRoutes);
+
             const server = app.listen(process.env.PORT || DEFAULT_PORT, () => {
                 const port = process.env.PORT || DEFAULT_PORT;
                 console.log(`Server running on port ${port}!`);
+                console.log(`Server inside callback: ${server}`)
+                console.log(server.listening)
+                resolve(server)
             })
 
-            app.use('/courses', courseRoutes);
-
-            resolve(server);
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to start server due to unexpected error';
             const serverError = new ServerError(
@@ -60,11 +62,13 @@ export const stopServer = (server: Server): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
         server.close((error) => {
             if (error) {
+                console.log(error)
                 const serverError = new ServerError(
                     'Failed to stop server',
                     ServerErrorCodes.CONNECTION_CLOSE_ERROR
                 )
-                return reject(serverError);
+                reject(serverError);
+                return;
             }
             console.log('Server stopped successfully.');
             resolve();

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import 'dotenv/config'
 import { DatabaseError, DatabaseErrorCodes } from '../errors/DatabaseError';
 
-export const connectToDB = async () => {
+export const connectToDB = async (): Promise<void> => {
     try {
         await mongoose.connect(process.env.MONGODB_URL)
         console.log("MongoDB database connection established successfully");
