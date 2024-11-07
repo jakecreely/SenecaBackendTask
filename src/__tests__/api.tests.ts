@@ -4,9 +4,9 @@ import { getRandomInt } from '../utils';
 import { DEFAULT_PORT } from '../config';
 import { Server } from 'http'
 import { connectToDB, disconnectFromDB } from '../db';
-import { startServer, stopServer } from '..';
 import axios from 'axios';
 import 'dotenv/config'
+import { startServer, stopServer } from '../server';
 
 // TODO: Add database testing
 // TODO: Edge cases
@@ -15,11 +15,13 @@ const api = axios.create({
   baseURL: `http://localhost:${process.env.PORT || DEFAULT_PORT}`,
 });
 
-let server : Server
+let server: Server | null = null
+
+// TODO: Add test functions for initialising
 
 beforeAll(async () => {
   try {
-    server = startServer()
+    server = await startServer()
     await connectToDB()
   } catch (err) {
     console.log(err)
@@ -98,6 +100,8 @@ describe("GET /course/{courseId}", () => {
         userid: userId
       }
     })
+
+    console.log(response.data)
 
     expect(response.data).toHaveProperty('totalModulesStudied')
     expect(response.data).toHaveProperty('averageScore')

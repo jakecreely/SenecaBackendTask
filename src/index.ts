@@ -1,45 +1,26 @@
-import express from 'express';
-import cors from 'cors';
 import 'dotenv/config'
-import { Server } from 'http'
 import { connectToDB } from './db';
-import { DEFAULT_PORT } from './config';
+import { startServer } from './server';
 
-// Routes
-import courseRoutes from './routes/courseRoutes'
+import { ServerError } from './errors/ServerError';
+import { DatabaseError } from './errors/DatabaseError';
 
-// TODO: Turn this into a promise as well - handle the errors
-export const startServer = () => {
-    const app = express();
-
-    connectToDB();
-
-    app.use(cors());
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-
-    const server = app.listen(process.env.PORT || DEFAULT_PORT, () => {
-        const port = process.env.PORT || DEFAULT_PORT;
-        console.log(`Server running on port ${port}!`);
-    })
-
-    app.use('/courses', courseRoutes);
-
-    return server;
+const initialiseApp = async () => {
+    try {
+        await startServer();
+        await connectToDB();
+    } catch (error) {
+        if (error instanceof DatabaseError) {
+            console.error('Database connection failed:', error.message);
+            process.exit(1);
+        } else if (error instanceof ServerError) {
+            console.error('Server initialization failed:', error.message);
+            process.exit(1);
+        } else {
+            console.error('Unexpected initialization error:', error);
+            process.exit(1);
+        }
+    }
 }
 
-//TODO: Add error codes and more context to the error
-export const stopServer = (server : Server) => {
-    return new Promise<void>((resolve, reject) => {
-        server.close((err) => {
-            if (err) {
-                console.error('Error stopping server:', err);
-                return reject(err);
-            }
-            console.log('Server stopped successfully.');
-            resolve();
-        });
-    });
-}
-
-startServer()
+initialiseApp()

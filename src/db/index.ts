@@ -1,24 +1,21 @@
 import mongoose from 'mongoose';
 import 'dotenv/config'
+import { DatabaseError, DatabaseErrorCodes } from '../errors/DatabaseError';
 
-// TODO: Throw errors
-export const connectToDB = async () => {
-    await mongoose.connect(process.env.MONGODB_URL)
-
-    mongoose.connection.once("open", () => {
+export const connectToDB = async (): Promise<void> => {
+    try {
+        await mongoose.connect(process.env.MONGODB_URL)
         console.log("MongoDB database connection established successfully");
-    });
-
-    mongoose.connection.on("error", (err) => {
-        console.error("MongoDB connection error:", err);
-    });
+    } catch (error) {
+        throw new DatabaseError('Failed to connect to MongoDB', DatabaseErrorCodes.CONNECTION_ERROR)
+    }
 }
 
-export const disconnectFromDB = async () => {
+export const disconnectFromDB = async (): Promise<void> => {
     try {
         await mongoose.disconnect();
         console.log("MongoDB database connection closed successfully");
     } catch (error) {
-        console.error("Error disconnecting from MongoDB:", error);
+        throw new DatabaseError('Failed to disconnect from MongoDB', DatabaseErrorCodes.DISCONNECT_ERROR)
     }
 };
