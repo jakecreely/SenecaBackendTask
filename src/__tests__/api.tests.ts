@@ -4,7 +4,7 @@ import { getRandomInt } from '../utils';
 import { DEFAULT_PORT } from '../config';
 import { Server } from 'http'
 import { connectToDB, disconnectFromDB } from '../db';
-import axios from 'axios';
+import axios, { AxiosError, HttpStatusCode } from 'axios';
 import 'dotenv/config'
 import { startServer, stopServer } from '../server';
 
@@ -40,8 +40,9 @@ afterAll(async () => {
 describe("POST /courses/{courseId}", () => {
   test("Persists a session study event with valid inputs", async () => {
     // Parameters
-    const userId = uuidv4();
     const courseId = uuidv4();
+
+    const userId = uuidv4();
 
     // Request Body
     const sessionId = uuidv4();
@@ -63,11 +64,87 @@ describe("POST /courses/{courseId}", () => {
     expect(response.status).toBe(axios.HttpStatusCode.Created)
   })
 
+  test("Should return bad request status when userid is missing from header", async () => {
+    try {
+      // Parameters
+      const courseId = uuidv4();
+
+      // Request Body
+      const sessionId = uuidv4();
+      const totalModulesStudied = getRandomInt(50);
+      const averageScore = getRandomInt(100);
+      const timeStudied = getRandomInt(120);
+
+      await api.post(`/courses/${courseId}`, {
+        sessionId: sessionId,
+        totalModulesStudied: totalModulesStudied,
+        averageScore: averageScore,
+        timeStudied: timeStudied
+      }, {
+        headers: {
+        }
+      })
+
+    } catch (err) {
+      if (err instanceof AxiosError && err.response) {
+        expect(err.response.status).toBe(axios.HttpStatusCode.BadRequest)
+      } else {
+        throw err
+      }
+    }
+  })
+
+  test("Should return conflict status when creating session with an existing ID", async () => {
+    // Parameters
+    const courseId = uuidv4();
+
+    // Headers
+    const userId = uuidv4();
+
+    // Request Body
+    const sessionId = uuidv4();
+    const totalModulesStudied = getRandomInt(50);
+    const averageScore = getRandomInt(100);
+    const timeStudied = getRandomInt(120);
+
+    await api.post(`/courses/${courseId}`, {
+      sessionId: sessionId,
+      totalModulesStudied: totalModulesStudied,
+      averageScore: averageScore,
+      timeStudied: timeStudied
+    }, {
+      headers: {
+        userid: userId
+      }
+    })
+
+    try {
+      const response = await api.post(`/courses/${courseId}`, {
+        sessionId: sessionId,
+        totalModulesStudied: totalModulesStudied,
+        averageScore: averageScore,
+        timeStudied: timeStudied
+      }, {
+        headers: {
+          userid: userId
+        }
+      })
+
+      // Fallback incase no error is thrown
+      expect(response.status).toBe(HttpStatusCode.Conflict)
+
+    } catch (err) {
+      if (err instanceof AxiosError && err.response) {
+        expect(err.response.status).toBe(HttpStatusCode.Conflict)
+      } else {
+        throw err
+      }
+    }
+  })
+
   test.todo("Fails because of server error")
 
   test.todo("Fails because of parameter error")
-
-  test.todo("Fails because of header error")
 
 })
 
@@ -100,8 +177,6 @@ describe("GET /course/{courseId}", () => {
         userid: userId
       }
     })
-
-    console.log(response.data)
 
     expect(response.data).toHaveProperty('totalModulesStudied')
     expect(response.data).toHaveProperty('averageScore')
