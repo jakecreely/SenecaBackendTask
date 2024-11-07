@@ -15,15 +15,17 @@ const courseIdParamSchema = z.object({
     courseId: z.string().min(1, "Course ID is a required parameter").uuid("Course ID Needs to be in UUID format")
 })
 
-const sessionIdParamSchema = z.object({
-    sessionId: z.string().min(1, "Session ID is a required parameter").uuid("Session ID Needs to be in UUID format")
-})
-
 const courseIdAndSessionIdParamSchema = z.object({
     courseId: z.string().min(1, "Course ID is a required parameter").uuid("Course ID Needs to be in UUID format"),
     sessionId: z.string().min(1, "Session ID is a required parameter").uuid("Session ID Needs to be in UUID format")
 })
 
+const createSessionBodySchema = z.object({
+    sessionId: z.string().min(1, "Session ID is required in the request body").uuid("Session ID Needs to be in UUID format"),
+    totalModulesStudied: z.number().min(0),
+    averageScore: z.number().min(0),
+    timeStudied: z.number().min(0)
+})
 
 // TODO: Standardise error structure
 const validateHeaders = (schema: z.ZodSchema<any>) => {
@@ -53,6 +55,22 @@ const validateParameters = (schema: z.ZodSchema<any>) => {
             })
         } else {
             req.params = validationResult.data
+            next()
+        }
+    }
+}
+
+const validateBody = (schema: z.ZodSchema<any>) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        const validationResult = schema.safeParse(req.body)
+        if (!validationResult.success) {
+            res.status(HttpStatusCode.BadRequest).send({
+                status: "error",
+                message: "Validation error",
+                errors: validationResult.error.errors
+            })
+        } else {
+            req.body = validationResult.data
             next()
         }
     }
@@ -93,7 +111,7 @@ router.get('/:courseId', [validateHeaders(headersSchema), validateParameters(cou
     }
 })
 
-router.post('/:courseId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema)], async (req: Request<{ courseId: string }>, res: Response, next: NextFunction) => {
+router.post('/:courseId', [validateHeaders(headersSchema), validateParameters(courseIdParamSchema), validateBody(createSessionBodySchema)], async (req: Request<{ courseId: string }>, res: Response, next: NextFunction) => {
     try {
         const courseId = req.params.courseId
         const userId = req.headers['userid']
