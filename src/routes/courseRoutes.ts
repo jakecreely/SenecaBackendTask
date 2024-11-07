@@ -117,6 +117,15 @@ router.post('/:courseId', [validateHeaders(headersSchema), validateParameters(co
         const userId = req.headers['userid']
         const { sessionId, totalModulesStudied, averageScore, timeStudied } = req.body
 
+        const existingSession = await Session.findOne({ _id: sessionId });
+
+        if (existingSession) {
+            res.status(HttpStatusCode.Conflict).send({
+                message: "Session with this sessionId already exists"
+            });
+            return;
+        }
+        
         const session = new Session({
             _id: sessionId,
             courseId,
