@@ -1,12 +1,11 @@
 import 'dotenv/config'
 import { connectToDB } from './db';
-import { ServerError } from './errors/ServerError';
-
-// Routes
-import { DatabaseError } from './errors/DatabaseError';
 import { startServer } from './server';
 
-export const initialiseApp = async () => {
+import { ServerError } from './errors/ServerError';
+import { DatabaseError } from './errors/DatabaseError';
+
+const initialiseApp = async () => {
     try {
         await startServer();
         await connectToDB();
