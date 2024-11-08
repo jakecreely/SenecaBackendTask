@@ -1,15 +1,47 @@
-Seneca Backend Technical Task - Jake Creely
+# Seneca Backend Technical Task - Jake Creely
 
-Here is my service for the seneca backend technical task. 
+## Deployment
 
-To get it working, you should have mongodb installed and running. Then update the environment variables below:
+### Prerequisites
 
-PORT - define the port the server runs on by default this is 3000 as defined in src/config.ts
-MONGODB_URL - url of mongodb instance, it might look something like this mongodb://localhost:27017/stats
+1. **Node.js** and **npm** installed.
+2. **Database**: A MongoDB database is set up and accessible.
+3. **Environment Variables**: For configuring the database and HTTP port.
 
-To run it, you can use `npm run start`
+### Step 1: Clone the Repository
 
-To run the tests, you can use `npm run test`
+Start by cloning the repository to your local machine:
 
-Assumptions:
-Only added test cases for the responses in the API schema which were all if it was successful. The routes should handle errors but no test cases to confirm at the moment.
+```bash
+git clone https://github.com/your-username/course-stats-service.git
+cd course-stats-service
+```
+
+### Step 2: Install Dependencies
+Install the required dependencies via npm:
+
+```bash
+npm install
+```
+
+### Step 3: Configure Environment Variables
+Create a .env file in the root of the project and define the environment variables.
+
+```
+MONGODB_URL=mongodb://localhost:27017/stats
+PORT=3000
+```
+
+### Step 3: Test the application
+To ensure everything is working correctly run the test command which will test both the API and the database.
+
+```bash
+npm run test
+```
+
+### Step 3: Run the application locally 
+Once everything is working, we can run it locally.
+
+```bash
+npm run start
+```
