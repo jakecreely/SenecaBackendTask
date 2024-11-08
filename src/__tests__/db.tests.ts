@@ -6,7 +6,7 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import { Session } from "../models/Session";
 import { getRandomInt } from "../utils";
 
-describe('CourseStats Model Test', () => {
+describe('Session Model Tests', () => {
     let connection: MongoMemoryServer;
     let db: Mongoose;
 

@@ -8,16 +8,11 @@ import axios, { AxiosError, HttpStatusCode } from 'axios';
 import 'dotenv/config'
 import { startServer, stopServer } from '../server';
 
-// TODO: Add database testing
-// TODO: Edge cases
-
 const api = axios.create({
   baseURL: `http://localhost:${process.env.PORT || DEFAULT_PORT}`,
 });
 
 let server: Server | null = null
-
-// TODO: Add test functions for initialising
 
 beforeAll(async () => {
   try {
